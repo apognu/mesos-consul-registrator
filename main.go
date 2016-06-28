@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"net/http"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -17,9 +18,10 @@ import (
 )
 
 type configOptions struct {
-	Master     []*url.URL
-	Frameworks []string
-	Interval   time.Duration
+	Master      []*url.URL
+	Frameworks  []string
+	Interval    time.Duration
+	Healthcheck string
 }
 
 type addressPort struct {
@@ -36,7 +38,13 @@ func initConfig() {
 	nodes := flag.String("nodes", "127.0.0.1:5050", "comma-separated list of Mesos nodes")
 	frameworks := flag.String("frameworks", "marathon,chronos", "comma-separated list of Mesos frameworks to discover (eg. 'marathon,chronos')")
 	flag.DurationVar(&config.Interval, "duration", 10*time.Second, "interval at which to check for topology change")
+	flag.StringVar(&config.Healthcheck, "healthcheck", ":8080", "listen address of healthcheck HTTP server")
 	flag.Parse()
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("OK"))
+	})
+	go http.ListenAndServe(config.Healthcheck, nil)
 
 	for _, node := range strings.Split(*nodes, ",") {
 		url, err := url.Parse(fmt.Sprintf("http://%s", node))

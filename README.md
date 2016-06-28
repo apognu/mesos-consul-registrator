@@ -22,6 +22,8 @@ Usage of /home/apognu/Programming/go/bin/mesos-consul-registrator:
         interval at which to check for topology change (default 10s)
   -frameworks string
         comma-separated list of Mesos frameworks to discover (eg. 'marathon,chronos') (default "marathon,chronos")
+  -healthcheck string
+        listen address of healthcheck HTTP server (default ":8080")
   -nodes string
         comma-separated list of Mesos nodes (default "127.0.0.1:5050")
 ```
